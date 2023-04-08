@@ -1,0 +1,13 @@
+---
+- name: install server
+  hosts: ipa.otus.lan
+  become: true
+  roles:
+  - server
+
+- name: install client
+  hosts: client1.otus.lan, client2.otus.lan
+  become: true
+  roles:
+  - client
+...

@@ -1,0 +1,76 @@
+---
+- name: Start firewalld
+  systemd:
+    name: firewalld
+    state: started
+    enabled: true
+
+- name: Add prots to firewall
+  firewalld:
+    port: "{{ item }}/tcp"
+    state: enabled
+    immediate: true
+    permanent: true
+  loop:
+    - 80
+    - 443
+    - 389
+    - 464
+    - 636
+    - 88
+    - 53
+    - 123
+
+- name: reload service firewalld
+  systemd:
+    name: firewalld
+    state: reloaded
+
+- name: Add mirrorlist to repo
+  shell: cd /etc/yum.repos.d/ | sed -i 's/mirrorlist/#mirrorlist/g' /etc/yum.repos.d/CentOS-* | sed -i 's|#baseurl=http://mirror.centos.org|baseurl=http://vault.centos.org|g' /etc/yum.repos.d/CentOS-*
+
+
+- name: Set timezone Europe/Moscow
+  timezone:
+    name: Europe/Moscow
+
+- name: Install Chrony
+  dnf:
+    name:
+      - chrony
+    state: present
+
+- name: Enable Chrony
+  systemd:
+    name: chronyd
+    state: started
+    enabled: true
+
+
+- name: Install ipa-server
+  dnf:
+    name:
+      - ipa-server
+      - "@idm:DL1"
+      - ipa-server-dns
+      - bind-dyndb-ldap
+    state: present
+    disable_gpg_check: yes
+
+- name: Configure ipa-server
+  command:
+    ipa-server-install -U \
+    --hostname="ipa.otus.lan" \
+    -n "otus.lan" \
+    -r "OTUS.LAN" \
+    -p passwd1! \
+    -a passwd1! \
+    --ip-address="192.168.57.10" \
+    --mkhomedir
+    --setup-dns \
+    --auto-forwarders \
+    --no-reverse
+  args:
+    creates: /etc/ipa/default.conf
+
+...
