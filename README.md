@@ -1,5 +1,23 @@
-# HW25_LDAP
+Домашняя работа № 25. LDAP
+Установить FreeIPA;
 
+Написать Ansible playbook для конфигурации клиента;
+
+Firewall должен быть включен на сервере и на клиенте*
+
+Ход работы.
+
+Для установки необходимых пакетов на сервере и клиенте используем ansible
+
+Поднимаем стенд:
+```
+vagrant up
+```
+После чего с помощью ansible завершаем настройку сервера и клиентов:
+```
+ansible-playbook -i hosts site.yaml
+```
+Проверяем на сервере работу ipa. Получаем билет для пользователя admin
 ```
 [root@ipa ~]# kinit admin
 Password for admin@OTUS.LAN:
@@ -10,17 +28,8 @@ Default principal: admin@OTUS.LAN
 Valid starting     Expires            Service principal
 04/08/23 09:31:47  04/09/23 09:31:38  krbtgt/OTUS.LAN@OTUS.LAN
 ```
-
+Создаем нового пользователя на сервере IPA
 ```
-[root@ipa ~]# kinit admin
-Password for admin@OTUS.LAN:
-
-[root@ipa ~]# klist
-Ticket cache: KCM:0
-Default principal: admin@OTUS.LAN
-
-Valid starting     Expires            Service principal
-04/08/23 12:02:20  04/09/23 11:49:04  krbtgt/OTUS.LAN@OTUS.LAN
 [root@ipa ~]# ipa user-add otus-user --first=Otus --last=User --password
 Password:
 Введите Password ещё раз для проверки:
@@ -45,6 +54,9 @@ Added user "otus-user"
   Password: True
   Member of groups: ipausers
   Kerberos keys available: True
+```
+На клиенте проверяем:
+```
 [root@client1 ~]# su - otus-user
 Creating home directory for otus-user.
 [otus-user@client1 ~]$ pwd
